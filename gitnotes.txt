@@ -1,2 +1,0 @@
-git config remote.vm.uploadpack /run/current-system/sw/bin/git-upload-pack
-git config remote.vm.receivepack /run/current-system/sw/bin/git-receive-pack
