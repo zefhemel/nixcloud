@@ -38,4 +38,8 @@ subprocess.check_output(["git", "clone", repo_path], stderr=subprocess.STDOUT)
 print "Building"
 os.chdir(repo)
 output = subprocess.check_output(["nix-build", "-A", "runner"])
-print output
+nix_path = output.rstrip().split("\n")[-1]
+print "Copying closure"
+subprocess.check_output(["nix-copy-closure", "host", nix_path])
+print "Running (for shits and giggles)"
+subprocess.check_output(["ssh", "host", "sh %s" % nix_path])

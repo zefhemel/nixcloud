@@ -7,3 +7,4 @@ REPODIR=/home/$USERNAME/repo/$REPO
 mkdir -p $REPODIR
 cd $REPODIR
 git init --bare
+chown -R $USERNAME $REPODIR
