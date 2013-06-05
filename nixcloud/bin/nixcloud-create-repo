@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+USERNAME=$1
+REPO=$2
+REPODIR = /home/$USERNAME/repo/$REPO
+
+mkdir -p $REPODIR
+cd $REPODIR
+git init --bare

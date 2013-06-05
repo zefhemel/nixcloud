@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+USERNAME=$1
+REPO=$2
+REPO_PATH = /home/$USERNAME/repo/$REPO
+REPO_CHECKOUT_PATH = /home/$USERNAME/checkout
+
+mkdir -p $REPO_CHECKOUT_PATH
+cd $REPO_CHECKOUT_PATH
+git clone $REPO_PATH 
+cd $REPO
+nix-build -A runner
+#ERRCODE=$?
+#if [ $ERRCODE -ne 0 ]; then
+#   echo "Build failed."
+#   exit $?
+#fi

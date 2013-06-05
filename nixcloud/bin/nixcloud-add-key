@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+USERNAME=$1
+PUBLIC_KEY=$2
+SSH_DIR=/home/$USERNAME/.ssh
+
+mkdir -p $SSH_DIR
+echo $PUBLIC_KEY >> $SSH_DIR/authorized_keys

@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+USERNAME=$1
+
+useradd --home /home/$USERNAME --create-home --shell /bin/sh $USERNAME
