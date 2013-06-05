@@ -1,0 +1,41 @@
+#!/usr/bin/python
+
+import argparse
+import subprocess
+
+import os, errno
+
+def mkdir_p(path):
+  try:
+    os.makedirs(path)
+  except OSError as exc:
+    if exc.errno == errno.EEXIST and os.path.isdir(path):
+      pass
+    else: raise
+
+parser = argparse.ArgumentParser(description='Deploy NixCloud job.')
+parser.add_argument('user', type=str, help='Username to deploy for')
+parser.add_argument('repo', type=str, help='Repository to deploy deploy')
+parser.add_argument('--homedir', help='Location of homedir')
+
+args = parser.parse_args()
+
+user = args.user
+repo = args.repo
+homedir = args.homedir
+if homedir == None:
+  homedir = '/home'
+
+repo_path = "%s/%s/repo/%s" % (homedir, user, repo)
+repo_checkout_path = "%s/%s/checkout" % (homedir, user)
+
+mkdir_p(repo_checkout_path)
+os.chdir(repo_checkout_path)
+print "Removing old checkout"
+subprocess.check_output(["rm", "-rf", repo])
+print "Cloning anew: %s" % repo_path
+subprocess.check_output(["git", "clone", repo_path], stderr=subprocess.STDOUT)
+print "Building"
+os.chdir(repo)
+output = subprocess.check_output(["nix-build", "-A", "runner"])
+print output

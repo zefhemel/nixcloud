@@ -1,12 +1,10 @@
-let
-  pkgs = import <nixpkgs> {};
-  nixcloud = import ./default.nix { 
-    inherit pkgs;
-    inherit (pkgs) stdenv;
-  };
-in {
+{
   network.description = "NixCloud";
-  builder = import ./builder.nix {
-    inherit pkgs nixcloud;
-  };
+  builder = { pkgs, ...}:
+    let
+      nixcloud = import ./default.nix { 
+        inherit pkgs;
+        inherit (pkgs) stdenv;
+      };
+    in import ./builder.nix { inherit pkgs nixcloud; };
 }
