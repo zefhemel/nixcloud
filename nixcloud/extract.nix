@@ -15,8 +15,8 @@ in {
   };
   systemDService = pkgs.writeText "systemd.service" ''
 [Service]
-Type=forking
-ExecStart=${pkgs.bash}/bin/bash ${content.runner}
+Type=simple
+ExecStart=/bin/sh ${content.runner}
 ${concatMapStrings (n: "Environment=\"${n}=${getAttr n env}\"\n") (attrNames env)}
 Restart=on-failure
 User=${user}

@@ -1,8 +1,22 @@
 { pkgs, nixcloud, ... }:
 {
-  environment.systemPackages = [ pkgs.git nixcloud ];
+  environment.systemPackages = [ pkgs.git pkgs.vim nixcloud ];
 
   services.rabbitmq.enable = true;
+
+  systemd.services."activate-worker" = {
+    description = "activation worker";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "rabbitmq.service" ];
+    script = ''
+    export PATH=$PATH:/run/current-system/sw/bin:/run/current-system/sw/sbin
+    ${nixcloud}/bin/nixcloud-activate-worker
+    '';
+    serviceConfig = {
+      Type="simple";
+      Restart="on-failure";
+    };
+  };
 
   systemd.services."setup-once" = {
     description = "One off system setup job";

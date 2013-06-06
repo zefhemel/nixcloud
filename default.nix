@@ -5,7 +5,7 @@ stdenv.mkDerivation rec {
   src = ./nixcloud;
   buildInputs = [ pkgs.python ];
   installPhase = ''
-    mkdir -p $out
-    cp -r bin $out/bin
+    mkdir -p $out/bin
+    cp -r * $out/
   '';
 }

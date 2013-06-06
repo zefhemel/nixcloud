@@ -1,6 +1,6 @@
 { pkgs, nixcloud, ... }:
 {
-  environment.systemPackages = [ nixcloud ];
+  environment.systemPackages = [ nixcloud pkgs.vim ];
 
   systemd.services."setup-once" = {
     description = "One off system setup job";
