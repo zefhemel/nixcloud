@@ -2,6 +2,8 @@
 {
   environment.systemPackages = [ pkgs.git nixcloud ];
 
+  services.rabbitmq.enable = true;
+
   systemd.services."setup-once" = {
     description = "One off system setup job";
     wantedBy = [ "multi-user.target" ];

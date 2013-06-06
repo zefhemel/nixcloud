@@ -1,0 +1,28 @@
+#!/usr/bin/python
+
+import argparse
+import subprocess
+
+parser = argparse.ArgumentParser(description='Activate an application on the current machine.')
+parser.add_argument('user', type=str, help='Username to deploy for')
+parser.add_argument('repo', type=str, help='Repository to deploy')
+parser.add_argument('systemdservice', help='Absolute path to systemd service config')
+
+args = parser.parse_args()
+
+systemdservice = args.systemdservice
+service_filename = "%s-%s.service" % (args.user, args.repo)
+
+print "Removing old checkout"
+subprocess.check_output(["rm", "-rf", repo])
+print "Cloning anew: %s" % repo_path
+subprocess.check_output(["git", "clone", repo_path], stderr=subprocess.STDOUT)
+print "Building"
+os.chdir(repo)
+output = subprocess.check_output(["nix-build", "-A", "runner"])
+nix_path = output.rstrip().split("\n")[-1]
+print "Copying closure"
+subprocess.check_output(["nix-copy-closure", "host", nix_path])
+print "Running (for shits and giggles)"
+subprocess.check_output(["ssh", "host", "sh %s" % nix_path])
+

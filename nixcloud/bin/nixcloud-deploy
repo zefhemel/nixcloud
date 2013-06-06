@@ -2,8 +2,9 @@
 
 import argparse
 import subprocess
-
-import os, errno
+import os
+import os.path
+import errno
 
 def mkdir_p(path):
   try:
@@ -13,18 +14,20 @@ def mkdir_p(path):
       pass
     else: raise
 
+
+extract_path = "%s/extract.nix" % os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 parser = argparse.ArgumentParser(description='Deploy NixCloud job.')
 parser.add_argument('user', type=str, help='Username to deploy for')
 parser.add_argument('repo', type=str, help='Repository to deploy deploy')
-parser.add_argument('--homedir', help='Location of homedir')
+parser.add_argument('--homedir', help='Location of homedir', default="/home")
+parser.add_argument('--host', help='Location of homedir', default="host")
 
 args = parser.parse_args()
-
 user = args.user
 repo = args.repo
 homedir = args.homedir
-if homedir == None:
-  homedir = '/home'
+host = args.host
 
 repo_path = "%s/%s/repo/%s" % (homedir, user, repo)
 repo_checkout_path = "%s/%s/checkout" % (homedir, user)
@@ -37,9 +40,14 @@ print "Cloning anew: %s" % repo_path
 subprocess.check_output(["git", "clone", repo_path], stderr=subprocess.STDOUT)
 print "Building"
 os.chdir(repo)
-output = subprocess.check_output(["nix-build", "-A", "runner"])
+cmd = ["nix-build", "-A", "systemDService", extract_path,
+       "--arg", "exprPath", "%s/%s/default.nix" % (repo_checkout_path, repo),
+       "--argstr", "user", user,
+       "--arg", "env", "{PORT=\"8080\";}"]
+output = subprocess.check_output(cmd)
 nix_path = output.rstrip().split("\n")[-1]
-print "Copying closure"
-subprocess.check_output(["nix-copy-closure", "host", nix_path])
-print "Running (for shits and giggles)"
-subprocess.check_output(["ssh", "host", "sh %s" % nix_path])
+print "From this point onwards stuff should be executed as root"
+print "Copying closure: %s to %s" % (nix_path, host)
+subprocess.check_output(["nix-copy-closure", host, nix_path])
+print "Activating remotely"
+subprocess.check_output(["ssh", host, "nixcloud-activate %s %s %s" % (user, repo, nix_path)])
