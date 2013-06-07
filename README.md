@@ -43,7 +43,7 @@ To push to that repo:
     $ mkdir mynewrepo
     $ cd mynewrepo
     $ git init
-    $ git remote add origin zef@<ip-of-builder>:repos/mynewrepo
+    $ git remote add origin zef@<ip-of-builder>:repo/mynewrepo
 
 Now, create some content, or use the sample app:
 
