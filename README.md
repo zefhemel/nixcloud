@@ -18,7 +18,7 @@ How to setup and use
 ====================
 
     $ ./generate-keys.sh
-    $ nixops create network.nix infra-vbox.nix --create nixcloud
+    $ nixops create network.nix infra-vbox.nix -d nixcloud
     $ nixops deploy
 
 This deploys two servers:
