@@ -12,4 +12,8 @@ in pythonPackages.buildPythonPackage rec {
   propagatedBuildInputs =
     [ pythonPackages.psycopg2
       pythonPackages.pika ];
+
+  postInstall = ''
+    cp ${./extract.nix} $out/lib/extract.nix
+  '';
 }

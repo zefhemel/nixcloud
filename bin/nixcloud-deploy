@@ -2,13 +2,10 @@
 
 import os
 import sys
-NIXCLOUD_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+NIXCLOUD_ROOT = "%s/../../../../../../" % os.path.realpath(__file__)
 
-sys.path.insert(0, NIXCLOUD_ROOT)
-
-from nixcloud.queue import Queue
 import argparse
-import subprocess
+from subprocess import check_output
 import errno
 
 def mkdir_p(path):
@@ -24,33 +21,38 @@ extract_path = "%s/extract.nix" % NIXCLOUD_ROOT
 
 parser = argparse.ArgumentParser(description='Deploy NixCloud job.', prog='nixcloud-deploy')
 parser.add_argument('user', type=str, help='Username to deploy for')
-parser.add_argument('repo', type=str, help='Repository to deploy deploy')
-parser.add_argument('--homedir', help='Location of homedir', default="/home")
-parser.add_argument('--host', help='Location of homedir', default="host")
+parser.add_argument('app', type=str, help='App to deploy')
+parser.add_argument('--homedir', help='Location of homedir', default="/home/git")
 
 args = parser.parse_args()
 user = args.user
-repo = args.repo
+app = args.app
 homedir = args.homedir
-host = args.host
 
-repo_path = "%s/%s/repo/%s" % (homedir, user, repo)
-repo_checkout_path = "%s/%s/checkout" % (homedir, user)
+app_path = "%s/app/%s/%s" % (homedir, user, app)
 
-mkdir_p(repo_checkout_path)
-os.chdir(repo_checkout_path)
-print "Removing old checkout"
-subprocess.check_output(["rm", "-rf", repo])
-print "Cloning anew: %s" % repo_path
-subprocess.check_output(["git", "clone", repo_path], stderr=subprocess.STDOUT)
 print "Building"
-os.chdir(repo)
 cmd = ["nix-build", "-A", "systemDService", extract_path,
-       "--arg", "exprPath", "%s/%s/default.nix" % (repo_checkout_path, repo),
+       "--arg", "exprPath", "%s/default.nix" % app_path,
        "--argstr", "user", user,
        "--arg", "env", "{PORT=\"8080\";}"]
-output = subprocess.check_output(cmd)
+output = check_output(cmd)
 nix_path = output.rstrip().split("\n")[-1]
-print "Publishing to queue: %s" % nix_path
-queue = Queue()
-queue.publish("activate", "%s %s %s" % (user, repo, nix_path))
+print "Done: %s" % nix_path
+
+service_name = "%s-%s.service" % (user, app)
+service_dest = "/run/systemd/system/%s" % service_name
+
+print "Creating the user if necessary"
+try:
+  check_output(["sudo", "useradd", user])
+except:
+  print "User already existed."
+print "Removing old service file (if any)"
+check_output(["rm", "-f", service_dest])
+print "Symlinking the new one"
+check_output(["cp", nix_path, service_dest])
+print "Reloading systemd config files"
+check_output(["sudo", "systemctl", "--system", "daemon-reload"])
+print "Restarting service"
+check_output(["sudo", "systemctl", "restart", service_name])

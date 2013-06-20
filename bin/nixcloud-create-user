@@ -1,5 +1,0 @@
-#!/bin/sh -e
-
-USERNAME=$1
-
-useradd --home /home/$USERNAME --create-home --shell /run/current-system/sw/bin/git-shell $USERNAME
