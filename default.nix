@@ -7,13 +7,9 @@ in pythonPackages.buildPythonPackage rec {
   name = "nixcloud-${version}";
   version = "0.1";
   namePrefix = "";
-
   src = ./.;
-
   doCheck = false;
-
   propagatedBuildInputs =
     [ pythonPackages.psycopg2
-      pythonPackages.pika
-    ];
+      pythonPackages.pika ];
 }

@@ -22,7 +22,7 @@ def mkdir_p(path):
 
 extract_path = "%s/extract.nix" % NIXCLOUD_ROOT
 
-parser = argparse.ArgumentParser(description='Deploy NixCloud job.')
+parser = argparse.ArgumentParser(description='Deploy NixCloud job.', prog='nixcloud-deploy')
 parser.add_argument('user', type=str, help='Username to deploy for')
 parser.add_argument('repo', type=str, help='Repository to deploy deploy')
 parser.add_argument('--homedir', help='Location of homedir', default="/home")

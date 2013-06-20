@@ -1,0 +1,27 @@
+import psycopg2
+
+HOSTNAME = "loc"
+
+conn = psycopg2.connect("dbname=%s user=%s" % ("nixcloud", "nixcloud"))
+cur = conn.cursor()
+
+cur.execute("""SELECT
+                 users.username, applications.name, host, port
+               FROM
+                 deployments
+               LEFT JOIN applications ON deployments.app_id = applications.id 
+               LEFT JOIN users ON applications.user_id = users.id
+               WHERE
+                 active = true;""")
+
+for (username, application_name, host, port) in cur.fetchall():
+    print """
+    server {
+        listen 8080;
+        server_name %s.%s.%s
+
+        location / {
+            proxy_pass http://%s:%s
+        }
+    }
+    """ % (application_name, username, HOSTNAME, host, port)
